@@ -131,6 +131,12 @@ class Store {
     this.trips.push(trip);
     this.notify();
   }
+  
+  createTrip(trip: Trip) {
+    this.trips.push(trip);
+    this.notify();
+    return trip;
+  }
 
   updateTrip(updatedTrip: Trip) {
     const index = this.trips.findIndex(t => t.id === updatedTrip.id);

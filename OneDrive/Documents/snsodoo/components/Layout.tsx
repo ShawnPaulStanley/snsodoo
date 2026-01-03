@@ -55,6 +55,10 @@ export const Layout = ({ children }: { children?: React.ReactNode }) => {
             <LayoutDashboard className="h-5 w-5" />
             Dashboard
           </NavLink>
+          <NavLink to="/my-trips" className={navLinkClass}>
+            <Map className="h-5 w-5" />
+            My Trips
+          </NavLink>
           <NavLink to="/create-trip" className={navLinkClass}>
             <PlusCircle className="h-5 w-5" />
             Plan New Trip
