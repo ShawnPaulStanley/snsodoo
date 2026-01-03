@@ -12,22 +12,33 @@ export const Login = () => {
   const [checkingAuth, setCheckingAuth] = useState(true);
   const navigate = useNavigate();
 
-  // Check if user is already logged in
+  // Check if user is already logged in and handle OAuth callback
   useEffect(() => {
-    const checkSession = async () => {
+    const handleAuth = async () => {
+      // Check if this is an OAuth callback (has access_token in URL)
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const accessToken = hashParams.get('access_token');
+      
+      if (accessToken) {
+        // Clear the hash from URL
+        window.history.replaceState(null, '', window.location.pathname);
+        // Wait a moment for Supabase to process the token
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+
       const session = await getSession();
       if (session) {
         navigate('/dashboard');
+        return;
       }
       setCheckingAuth(false);
     };
-    checkSession();
+    handleAuth();
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session) {
-        // New user needs to set preferences
-        setStep(2);
+        navigate('/dashboard');
       }
     });
 
