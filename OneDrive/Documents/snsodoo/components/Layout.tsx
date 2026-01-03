@@ -1,110 +1,136 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { store } from '../services/store';
-import { LayoutDashboard, Map, User as UserIcon, LogOut, PlusCircle, Globe } from 'lucide-react';
-import { Button } from './ui';
-import { useAppTheme } from '../hooks/useTripTheme';
+import { LayoutDashboard, Map, User as UserIcon, PlusCircle, Sun, Moon } from 'lucide-react';
+import { buildTheme, ThemeConfig } from '../services/theme';
+import { TripIntent, SpendingStyle } from '../types';
 
 export const Layout = ({ children }: { children?: React.ReactNode }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const user = store.getCurrentUser();
-  const theme = useAppTheme();
+  const [theme, setTheme] = useState<ThemeConfig>(buildTheme(TripIntent.Business, SpendingStyle.Deluxe));
+  const [isDark, setIsDark] = useState(() => {
+    const saved = localStorage.getItem('gt_darkMode');
+    return saved ? saved === 'true' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
 
-  const handleLogout = () => {
-    store.logout().then(() => navigate('/login'));
-  };
+  // Apply dark mode class to HTML element
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', isDark);
+    localStorage.setItem('gt_darkMode', String(isDark));
+  }, [isDark]);
+
+  // Update theme when preferences change
+  useEffect(() => {
+    const updateTheme = () => {
+      const prefs = store.getPreferences();
+      if (prefs) {
+        setTheme(buildTheme(prefs.intent, prefs.spendingStyle));
+      }
+    };
+    
+    updateTheme();
+    return store.subscribe(updateTheme);
+  }, []);
+
+  useEffect(() => {
+    if (!user && location.pathname !== '/login' && location.pathname !== '/signup') {
+      navigate('/login');
+    }
+  }, [user, location.pathname, navigate]);
 
   if (!user && location.pathname !== '/login' && location.pathname !== '/signup') {
-     React.useEffect(() => {
-        navigate('/login');
-     }, [navigate]);
-     return null;
+    return null;
   }
 
   if (location.pathname === '/login' || location.pathname === '/signup') {
     return <>{children}</>;
   }
 
-  // Helper for NavLink styles
-  const navLinkClass = ({ isActive }: { isActive: boolean }) => 
-    `flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${isActive ? `${theme.accentBg} ${theme.accent}` : 'opacity-60 hover:opacity-100 hover:bg-black/5'}`;
+  const toggleDarkMode = () => setIsDark(!isDark);
 
   return (
-    <div className={`flex flex-col md:flex-row ${theme.wrapper}`}>
-      {/* Mobile Header */}
-      <div className={`md:hidden ${theme.card} !rounded-none border-b !border-black/5 p-4 flex justify-between items-center sticky top-0 z-20`}>
-        <div className={`flex items-center gap-2 font-bold text-xl ${theme.icons}`}>
-           <Globe className="h-6 w-6" /> GlobeTrotter
-        </div>
-        <button className="opacity-60">
-           <UserIcon className="h-6 w-6" />
-        </button>
-      </div>
-
-      {/* Sidebar Navigation (Desktop) */}
-      <aside className={`hidden md:flex flex-col w-64 ${theme.card} !rounded-none border-r !border-black/5 h-screen sticky top-0 z-10`}>
-        <div className="p-6 border-b border-black/5">
-          <div className={`flex items-center gap-2 font-bold text-2xl ${theme.icons}`}>
-            <Globe className="h-8 w-8" /> GlobeTrotter
-          </div>
-        </div>
-
-        <nav className="flex-1 p-4 space-y-1">
-          <NavLink to="/" className={navLinkClass}>
-            <LayoutDashboard className="h-5 w-5" />
-            Dashboard
-          </NavLink>
-          <NavLink to="/my-trips" className={navLinkClass}>
-            <Map className="h-5 w-5" />
-            My Trips
-          </NavLink>
-          <NavLink to="/create-trip" className={navLinkClass}>
-            <PlusCircle className="h-5 w-5" />
-            Plan New Trip
-          </NavLink>
-          <NavLink to="/profile" className={navLinkClass}>
-            <UserIcon className="h-5 w-5" />
-            My Profile
-          </NavLink>
-        </nav>
-
-        <div className="p-4 border-t border-black/5">
-          <div className="flex items-center gap-3 mb-4 px-2">
-            <img src={user?.avatar} alt={user?.name} className={`h-10 w-10 object-cover ${theme.borderRadius}`} />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{user?.name}</p>
-              <p className="text-xs opacity-60 truncate">{user?.email}</p>
+    <div className={`min-h-screen bg-gray-50 dark:bg-surface-900 font-sans text-gray-900 dark:text-white transition-colors duration-300`}>
+      {/* Top Navigation */}
+      <nav className="sticky top-0 z-50 py-3 bg-white/80 dark:bg-surface-800/80 backdrop-blur-xl border-b border-gray-100 dark:border-surface-700">
+        <div className="flex items-center justify-between max-w-7xl mx-auto px-4">
+          {/* Logo */}
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center shadow-lg shadow-brand-500/20">
+              <Map className="w-4 h-4 text-white" />
             </div>
+            <span className="font-display font-bold text-lg tracking-tight hidden sm:block">GlobeTrotter</span>
           </div>
-          <button className={`w-full flex items-center justify-start px-4 py-2 text-sm text-red-500 hover:bg-red-50 rounded-lg transition-colors`} onClick={handleLogout}>
-            <LogOut className="h-5 w-5 mr-2" />
-            Sign Out
+
+          {/* Pill Navigation */}
+          <div className="hidden md:flex items-center gap-1 bg-gray-100 dark:bg-surface-700 rounded-2xl p-1.5 shadow-inner">
+            <NavLink 
+              to="/" 
+              className={({isActive}) => `flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${isActive ? 'bg-white dark:bg-surface-600 text-brand-600 dark:text-brand-400 shadow-md' : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'}`}
+            >
+              <LayoutDashboard className="h-4 w-4" />
+              Home
+            </NavLink>
+            <NavLink 
+              to="/my-trips" 
+              className={({isActive}) => `flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${isActive ? 'bg-white dark:bg-surface-600 text-brand-600 dark:text-brand-400 shadow-md' : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'}`}
+            >
+              <Map className="h-4 w-4" />
+              My Trips
+            </NavLink>
+            <NavLink 
+              to="/create-trip" 
+              className={({isActive}) => `flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${isActive ? 'bg-white dark:bg-surface-600 text-brand-600 dark:text-brand-400 shadow-md' : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'}`}
+            >
+              <PlusCircle className="h-4 w-4" />
+              Plan Trip
+            </NavLink>
+            <NavLink 
+              to="/profile" 
+              className={({isActive}) => `flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${isActive ? 'bg-white dark:bg-surface-600 text-brand-600 dark:text-brand-400 shadow-md' : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'}`}
+            >
+              <UserIcon className="h-4 w-4" />
+              Profile
+            </NavLink>
+          </div>
+
+          {/* Dark Mode Toggle */}
+          <button
+            onClick={toggleDarkMode}
+            className="p-2.5 rounded-xl bg-gray-100 dark:bg-surface-700 hover:bg-gray-200 dark:hover:bg-surface-600 text-gray-600 dark:text-gray-300 transition-all duration-200 hover:scale-105 active:scale-95"
+            aria-label="Toggle dark mode"
+          >
+            {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
           </button>
         </div>
-      </aside>
+      </nav>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto">
-        <div className={`max-w-7xl mx-auto p-4 md:p-8 ${theme.layoutDensity === 'relaxed' ? 'py-12' : ''}`}>
+      <main className="scroll-smooth pb-20 md:pb-0">
+        <div className="max-w-7xl mx-auto p-4 md:p-8 py-8 space-y-8">
           {children}
         </div>
       </main>
 
       {/* Mobile Bottom Nav */}
-      <nav className={`md:hidden fixed bottom-0 left-0 right-0 ${theme.card} !rounded-none border-t !border-black/5 flex justify-around p-3 z-20`}>
-         <NavLink to="/" className={({isActive}) => `flex flex-col items-center p-2 rounded-lg ${isActive ? theme.accent : 'opacity-50'}`}>
-            <LayoutDashboard className="h-6 w-6" />
-            <span className="text-[10px] mt-1">Home</span>
-         </NavLink>
-         <NavLink to="/create-trip" className={({isActive}) => `flex flex-col items-center p-2 rounded-lg ${isActive ? theme.accent : 'opacity-50'}`}>
-            <PlusCircle className="h-6 w-6" />
-            <span className="text-[10px] mt-1">Plan</span>
-         </NavLink>
-         <NavLink to="/profile" className={({isActive}) => `flex flex-col items-center p-2 rounded-lg ${isActive ? theme.accent : 'opacity-50'}`}>
-            <UserIcon className="h-6 w-6" />
-            <span className="text-[10px] mt-1">Profile</span>
-         </NavLink>
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-surface-800/80 backdrop-blur-xl border-t border-gray-100 dark:border-surface-700 flex justify-around p-2 z-50">
+        <NavLink to="/" className={({isActive}) => `flex flex-col items-center p-2 rounded-xl transition-all duration-200 ${isActive ? 'text-brand-600 dark:text-brand-400' : 'text-gray-500 dark:text-gray-400'}`}>
+          <LayoutDashboard className="h-6 w-6" />
+          <span className="text-[10px] mt-1 font-medium">Home</span>
+        </NavLink>
+        <NavLink to="/my-trips" className={({isActive}) => `flex flex-col items-center p-2 rounded-xl transition-all duration-200 ${isActive ? 'text-brand-600 dark:text-brand-400' : 'text-gray-500 dark:text-gray-400'}`}>
+          <Map className="h-6 w-6" />
+          <span className="text-[10px] mt-1 font-medium">Trips</span>
+        </NavLink>
+        <NavLink to="/create-trip" className={({isActive}) => `flex flex-col items-center p-2 rounded-xl transition-all duration-200 ${isActive ? 'text-brand-600 dark:text-brand-400' : 'text-gray-500 dark:text-gray-400'}`}>
+          <PlusCircle className="h-6 w-6" />
+          <span className="text-[10px] mt-1 font-medium">Plan</span>
+        </NavLink>
+        <NavLink to="/profile" className={({isActive}) => `flex flex-col items-center p-2 rounded-xl transition-all duration-200 ${isActive ? 'text-brand-600 dark:text-brand-400' : 'text-gray-500 dark:text-gray-400'}`}>
+          <UserIcon className="h-6 w-6" />
+          <span className="text-[10px] mt-1 font-medium">Profile</span>
+        </NavLink>
       </nav>
     </div>
   );

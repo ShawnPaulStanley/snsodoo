@@ -11,6 +11,9 @@ export interface City {
   country: string;
   imageUrl: string;
   costIndex: number; // 1-5 ($ to $$$$$)
+  lat?: number;
+  lon?: number;
+  currency?: string;
 }
 
 export enum ActivityType {
@@ -22,13 +25,22 @@ export enum ActivityType {
 
 export interface Activity {
   id: string;
-  tripStopId: string;
+  tripStopId?: string;
+  dayIndex?: number; // Which day of trip this belongs to
   title: string;
+  name?: string; // Alias for title
   description?: string;
   type: ActivityType;
+  category?: string;
   cost: number;
+  estimatedCost?: number; // Alias for cost
   startTime?: string; // ISO string
   durationMinutes?: number;
+  estimatedDuration?: number; // Alias for durationMinutes
+  address?: string;
+  lat?: number;
+  lon?: number;
+  rating?: number;
 }
 
 export interface TripStop {
@@ -78,4 +90,18 @@ export interface TripStats {
   totalDays: number;
   cityCount: number;
   categoryBreakdown: { name: string; value: number }[];
+}
+
+export interface CitySearchResult {
+  name: string;
+  country: string;
+  lat: number;
+  lon: number;
+  displayName: string;
+}
+
+export interface CurrencyInfo {
+  code: string;
+  symbol: string;
+  rate: number;
 }

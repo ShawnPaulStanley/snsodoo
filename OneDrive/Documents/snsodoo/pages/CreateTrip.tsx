@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { store } from '../services/store';
-import { Trip, TripIntent, SpendingStyle } from '../types';
-import { Card, Button, Input } from '../components/ui';
-import { Calendar, Palmtree, Mountain, Briefcase, Leaf, Users, DollarSign, Star, Zap, MapPin } from 'lucide-react';
-import { useTripTheme } from '../hooks/useTripTheme';
+import { Trip, TripIntent, SpendingStyle, CitySearchResult } from '../types';
+import { Calendar, MapPin, Sparkles, Loader2, Search } from 'lucide-react';
+import { buildTheme } from '../services/theme';
+import { CitySearch } from '../components/CitySearch';
+import { generateTripRecommendations } from '../services/api';
 
 const generateId = () => Math.random().toString(36).substr(2, 9);
 
@@ -14,15 +15,43 @@ export const CreateTrip = () => {
   const [description, setDescription] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [intent, setIntent] = useState<TripIntent>(TripIntent.Beach);
-  const [spendingStyle, setSpendingStyle] = useState<SpendingStyle>(SpendingStyle.Deluxe);
+  const [selectedCity, setSelectedCity] = useState<CitySearchResult | null>(null);
   const [loading, setLoading] = useState(false);
+  const [aiSuggestion, setAiSuggestion] = useState('');
+  const [loadingAI, setLoadingAI] = useState(false);
+  
+  // Get user's theme preference
+  const prefs = store.getPreferences();
+  const theme = buildTheme(prefs?.intent || TripIntent.Business, prefs?.spendingStyle || SpendingStyle.Deluxe);
 
-  // Get dynamic theme for live preview
-  const previewTheme = useTripTheme(intent, spendingStyle);
+  // Generate AI suggestion when city is selected
+  const handleGenerateItinerary = async () => {
+    if (!selectedCity || !startDate || !endDate) return;
+    
+    setLoadingAI(true);
+    const days = Math.ceil((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    
+    try {
+      const suggestion = await generateTripRecommendations(
+        selectedCity.name,
+        prefs?.intent || 'Beach',
+        prefs?.spendingStyle || 'Deluxe',
+        days
+      );
+      setAiSuggestion(suggestion);
+      if (!description) {
+        setDescription(`Trip to ${selectedCity.name}, ${selectedCity.country}`);
+      }
+    } catch (error) {
+      console.error('Failed to generate AI suggestion:', error);
+    }
+    setLoadingAI(false);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!title || !startDate || !endDate) return;
+    
     setLoading(true);
 
     const newTrip: Trip = {
@@ -35,42 +64,66 @@ export const CreateTrip = () => {
       coverImage: `https://picsum.photos/1200/400?random=${Math.floor(Math.random() * 100)}`,
       stops: [],
       isPublic: false,
-      intent,
-      spendingStyle
+      intent: prefs?.intent || TripIntent.Beach,
+      spendingStyle: prefs?.spendingStyle || SpendingStyle.Deluxe
     };
 
     store.addTrip(newTrip);
     
     setTimeout(() => {
-        setLoading(false);
-        navigate(`/trips/${newTrip.id}`);
+      setLoading(false);
+      navigate(`/trips/${newTrip.id}`);
     }, 500);
   };
 
   return (
     <div className="max-w-3xl mx-auto pb-12">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Plan a New Trip</h1>
-        <p className="text-slate-500">Customize the vibe and style of your next adventure.</p>
+      <div className="mb-8">
+        <h1 className={`text-3xl ${theme.headerFont} ${theme.headerStyle} ${theme.textColor}`}>
+          Plan a New Trip
+        </h1>
+        <p className={theme.mutedText}>Start your next adventure</p>
       </div>
 
-      <Card>
+      <div className={`${theme.card} ${theme.cardHover}`}>
         <form onSubmit={handleSubmit} className="space-y-8">
-          {/* Basic Info */}
+          {/* Destination Search */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-slate-900 border-b pb-2">Trip Details</h3>
-            <Input
-              label="Trip Name"
-              placeholder="e.g. Summer in Italy"
-              required
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
+            <h3 className={`text-lg font-semibold ${theme.textColor} border-b ${theme.divider} pb-2 flex items-center gap-2`}>
+              <Search className={`h-5 w-5 ${theme.iconStyle}`} />
+              Where to?
+            </h3>
+            <CitySearch 
+              onCitySelect={(city) => {
+                setSelectedCity(city);
+                if (!title) setTitle(`Trip to ${city.name}`);
+              }}
+              placeholder="Search for a destination..."
             />
+          </div>
+
+          {/* Trip Details */}
+          <div className="space-y-4">
+            <h3 className={`text-lg font-semibold ${theme.textColor} border-b ${theme.divider} pb-2`}>
+              Trip Details
+            </h3>
             
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Description</label>
+              <label className={`block text-sm font-medium ${theme.textColor} mb-1`}>Trip Name</label>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="e.g. Summer in Italy"
+                className={theme.input}
+                required
+              />
+            </div>
+            
+            <div>
+              <label className={`block text-sm font-medium ${theme.textColor} mb-1`}>Description</label>
               <textarea
-                className="block w-full rounded-lg border-slate-300 border bg-white px-3 py-2 text-sm placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                className={`${theme.input} min-h-[100px]`}
                 rows={3}
                 placeholder="What's the goal of this trip?"
                 value={description}
@@ -79,122 +132,92 @@ export const CreateTrip = () => {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <Input
-                label="Start Date"
-                type="date"
-                required
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-              />
-               <Input
-                label="End Date"
-                type="date"
-                required
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-              />
+              <div>
+                <label className={`block text-sm font-medium ${theme.textColor} mb-1`}>
+                  <Calendar className={`h-4 w-4 inline mr-1 ${theme.iconStyle}`} />
+                  Start Date
+                </label>
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className={theme.input}
+                  required
+                />
+              </div>
+              <div>
+                <label className={`block text-sm font-medium ${theme.textColor} mb-1`}>
+                  <Calendar className={`h-4 w-4 inline mr-1 ${theme.iconStyle}`} />
+                  End Date
+                </label>
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className={theme.input}
+                  required
+                />
+              </div>
             </div>
           </div>
 
-          {/* Theme Selection */}
-          <div className="space-y-4">
-             <h3 className="text-lg font-semibold text-slate-900 border-b pb-2">Vibe & Style (Adaptive UI)</h3>
-             
-             <div>
-                <label className="block text-sm font-medium text-slate-700 mb-3">What is the intent of this trip?</label>
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-                   {[
-                     { val: TripIntent.Beach, icon: Palmtree, label: 'Beach' },
-                     { val: TripIntent.HillStation, icon: Mountain, label: 'Hills' },
-                     { val: TripIntent.Business, icon: Briefcase, label: 'Work' },
-                     { val: TripIntent.Nature, icon: Leaf, label: 'Nature' },
-                     { val: TripIntent.Family, icon: Users, label: 'Family' },
-                   ].map((opt) => (
-                     <button
-                        key={opt.val}
-                        type="button"
-                        onClick={() => setIntent(opt.val)}
-                        className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all ${intent === opt.val ? 'border-brand-600 bg-brand-50 text-brand-700' : 'border-slate-200 hover:border-slate-300 text-slate-600'}`}
-                     >
-                        <opt.icon className="h-6 w-6 mb-2" />
-                        <span className="text-xs font-medium">{opt.label}</span>
-                     </button>
-                   ))}
+          {/* AI Suggestions */}
+          {selectedCity && startDate && endDate && (
+            <div className="space-y-4">
+              <div className={`flex items-center justify-between border-b ${theme.divider} pb-2`}>
+                <h3 className={`text-lg font-semibold ${theme.textColor}`}>
+                  <Sparkles className={`h-5 w-5 inline mr-2 ${theme.iconStyle}`} />
+                  AI Suggestions
+                </h3>
+                <button
+                  type="button"
+                  onClick={handleGenerateItinerary}
+                  disabled={loadingAI}
+                  className={theme.buttonSecondary}
+                >
+                  {loadingAI ? (
+                    <Loader2 className="h-4 w-4 animate-spin inline mr-2" />
+                  ) : (
+                    <Sparkles className="h-4 w-4 inline mr-2" />
+                  )}
+                  Generate Ideas
+                </button>
+              </div>
+              
+              {aiSuggestion && (
+                <div className={`${theme.surfaceSecondary} ${theme.borderRadius} p-4 border ${theme.border}`}>
+                  <pre className={`whitespace-pre-wrap text-sm ${theme.textColor} font-sans`}>
+                    {aiSuggestion}
+                  </pre>
                 </div>
-             </div>
+              )}
+            </div>
+          )}
 
-             <div>
-                <label className="block text-sm font-medium text-slate-700 mb-3">What is your spending style?</label>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    {[
-                      { val: SpendingStyle.Luxury, icon: Star, label: 'Luxury', desc: 'Premium, rich UI & animations' },
-                      { val: SpendingStyle.Deluxe, icon: DollarSign, label: 'Deluxe', desc: 'Balanced, modern interface' },
-                      { val: SpendingStyle.Minimalist, icon: Zap, label: 'Minimalist', desc: 'Clean, compact, list-based' },
-                    ].map((opt) => (
-                      <button
-                        key={opt.val}
-                        type="button"
-                        onClick={() => setSpendingStyle(opt.val)}
-                        className={`flex items-start text-left p-3 rounded-xl border-2 transition-all ${spendingStyle === opt.val ? 'border-brand-600 bg-brand-50' : 'border-slate-200 hover:border-slate-300'}`}
-                      >
-                         <div className={`p-2 rounded-lg mr-3 ${spendingStyle === opt.val ? 'bg-brand-200 text-brand-800' : 'bg-slate-100 text-slate-500'}`}>
-                             <opt.icon className="h-5 w-5" />
-                         </div>
-                         <div>
-                            <div className={`font-medium ${spendingStyle === opt.val ? 'text-brand-900' : 'text-slate-900'}`}>{opt.label}</div>
-                            <div className="text-xs text-slate-500 mt-0.5">{opt.desc}</div>
-                         </div>
-                      </button>
-                    ))}
-                </div>
-             </div>
-
-             {/* Live Preview Section */}
-             <div className="mt-6 border-t pt-6">
-                <label className="block text-sm font-medium text-slate-700 mb-3">Live Theme Preview</label>
-                <div className={`p-8 rounded-xl border border-slate-200/60 shadow-inner transition-all duration-500 ${previewTheme.wrapper.replace('min-h-screen', '')}`}>
-                    <div className="flex flex-col gap-6">
-                        <div>
-                            <h4 className={`${previewTheme.header} text-3xl mb-1`}>{title || "Trip to Paradise"}</h4>
-                            <p className={previewTheme.subheadings}>Itinerary Preview</p>
-                        </div>
-                        
-                        <div className="flex gap-3">
-                             <button type="button" className={previewTheme.button} onClick={(e) => e.preventDefault()}>Primary Action</button>
-                             <button type="button" className={previewTheme.buttonSecondary} onClick={(e) => e.preventDefault()}>Secondary</button>
-                        </div>
-                        
-                        <div className={`${previewTheme.card} w-full max-w-sm`}>
-                             <div className="flex justify-between items-start mb-3">
-                                 <div>
-                                     <div className={`${previewTheme.headings} text-lg`}>Destination City</div>
-                                     <div className="text-sm opacity-60">Country, Region</div>
-                                 </div>
-                                 <div className={`p-2 rounded-full ${previewTheme.accentBg} ${previewTheme.accent}`}>
-                                     <MapPin className="h-5 w-5" />
-                                 </div>
-                             </div>
-                             <div className="flex items-center gap-2 text-sm opacity-70">
-                                 <Calendar className="h-4 w-4" />
-                                 <span>Jun 15 - Jun 20</span>
-                             </div>
-                        </div>
-                    </div>
-                </div>
-                <p className="text-xs text-slate-400 mt-2 text-center">
-                    The interface styling, typography, colors, and layout density adapt automatically.
-                </p>
-             </div>
-          </div>
-
-          <div className="pt-4 flex justify-end gap-3 border-t">
-            <Button type="button" variant="secondary" onClick={() => navigate('/')}>Cancel</Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? 'Creating...' : 'Create & Start Planning'}
-            </Button>
+          {/* Submit */}
+          <div className="flex gap-4 pt-4 border-t">
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className={theme.buttonSecondary}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading || !title || !startDate || !endDate}
+              className={`flex-1 ${theme.buttonPrimary} disabled:opacity-50`}
+            >
+              {loading ? (
+                <Loader2 className="h-5 w-5 animate-spin inline mr-2" />
+              ) : (
+                <MapPin className="h-5 w-5 inline mr-2" />
+              )}
+              Create Trip
+            </button>
           </div>
         </form>
-      </Card>
+      </div>
     </div>
   );
 };
