@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Travel Planner - API Tester</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🌍 Travel Planner API Tester</h1>
+      <p class="subtitle">Test the backend API for smart travel itinerary generation</p>
+    </header>
+
+    <main>
+      <!-- Trip Creation Form -->
+      <section class="card form-section">
+        <h2>Create Trip Itinerary</h2>
+        <form id="tripForm">
+          <div class="form-group">
+            <label for="startingCity">Starting City</label>
+            <input 
+              type="text" 
+              id="startingCity" 
+              name="startingCity" 
+              placeholder="e.g., Mumbai, New York, London"
+              required
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="days">Number of Days</label>
+            <input 
+              type="number" 
+              id="days" 
+              name="days" 
+              min="1" 
+              max="30" 
+              value="5"
+              required
+            >
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="theme">Theme</label>
+              <select id="theme" name="theme" required>
+                <option value="">Select a theme...</option>
+                <option value="Beach">🏖️ Beach</option>
+                <option value="Hillstation">🏔️ Hillstation</option>
+                <option value="Work">💼 Work</option>
+                <option value="Nature">🌿 Nature</option>
+                <option value="Family">👨‍👩‍👧‍👦 Family</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="subTheme">Sub-Theme</label>
+              <select id="subTheme" name="subTheme" required>
+                <option value="">Select a sub-theme...</option>
+                <option value="Luxury">✨ Luxury</option>
+                <option value="Deluxe">🌟 Deluxe</option>
+                <option value="Budget">💰 Budget</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="currency">Currency</label>
+            <select id="currency" name="currency">
+              <option value="USD">USD - US Dollar</option>
+              <option value="EUR">EUR - Euro</option>
+              <option value="GBP">GBP - British Pound</option>
+              <option value="INR">INR - Indian Rupee</option>
+              <option value="JPY">JPY - Japanese Yen</option>
+              <option value="AUD">AUD - Australian Dollar</option>
+              <option value="CAD">CAD - Canadian Dollar</option>
+            </select>
+          </div>
+
+          <button type="submit" id="submitBtn" class="btn btn-primary">
+            <span class="btn-text">Generate Itinerary</span>
+            <span class="btn-loading" style="display: none;">
+              <span class="spinner"></span>
+              Generating...
+            </span>
+          </button>
+        </form>
+      </section>
+
+      <!-- Quick Actions -->
+      <section class="card">
+        <h2>Quick Actions</h2>
+        <div class="button-group">
+          <button class="btn btn-secondary" onclick="checkHealth()">
+            ❤️ Health Check
+          </button>
+          <button class="btn btn-secondary" onclick="getOptions()">
+            📋 Get Options
+          </button>
+          <button class="btn btn-secondary" onclick="validateServices()">
+            🔌 Validate Services
+          </button>
+          <button class="btn btn-secondary" onclick="clearResponse()">
+            🗑️ Clear Response
+          </button>
+        </div>
+      </section>
+
+      <!-- API Configuration -->
+      <section class="card">
+        <h2>API Configuration</h2>
+        <div class="form-group">
+          <label for="apiUrl">API Base URL</label>
+          <input 
+            type="text" 
+            id="apiUrl" 
+            value="http://localhost:4000"
+            placeholder="http://localhost:4000"
+          >
+        </div>
+      </section>
+
+      <!-- Response Display -->
+      <section class="card response-section">
+        <div class="response-header">
+          <h2>API Response</h2>
+          <div class="response-meta" id="responseMeta"></div>
+        </div>
+        
+        <div id="errorDisplay" class="error-display" style="display: none;"></div>
+        
+        <div id="loadingDisplay" class="loading-display" style="display: none;">
+          <div class="spinner large"></div>
+          <p>Generating your travel itinerary...</p>
+          <p class="loading-hint">This may take up to 60 seconds as we gather data from multiple APIs.</p>
+        </div>
+        
+        <pre id="responseDisplay" class="response-display"><code>// Response will appear here...</code></pre>
+      </section>
+    </main>
+
+    <footer>
+      <p>Travel Planner API v2.0 | Mock Frontend for Testing</p>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
