@@ -1,16 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { store } from '../services/store';
+import { NavLink } from 'react-router-dom';
 import { LayoutDashboard, Map, User as UserIcon, PlusCircle, Sun, Moon } from 'lucide-react';
-import { buildTheme } from '../services/theme';
 
 export const Layout = ({ children }: { children?: React.ReactNode }) => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const user = store.getCurrentUser();
-  // Use static theme
-  const theme = buildTheme();
-  
   const [isDark, setIsDark] = useState(() => {
     const saved = localStorage.getItem('gt_darkMode');
     return saved ? saved === 'true' : window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -21,20 +13,6 @@ export const Layout = ({ children }: { children?: React.ReactNode }) => {
     document.documentElement.classList.toggle('dark', isDark);
     localStorage.setItem('gt_darkMode', String(isDark));
   }, [isDark]);
-
-  useEffect(() => {
-    if (!user && location.pathname !== '/login' && location.pathname !== '/signup') {
-      navigate('/login');
-    }
-  }, [user, location.pathname, navigate]);
-
-  if (!user && location.pathname !== '/login' && location.pathname !== '/signup') {
-    return null;
-  }
-
-  if (location.pathname === '/login' || location.pathname === '/signup') {
-    return <>{children}</>;
-  }
 
   const toggleDarkMode = () => setIsDark(!isDark);
 
