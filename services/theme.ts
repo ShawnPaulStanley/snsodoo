@@ -54,50 +54,50 @@ export const buildTheme = (intent?: TripIntent, spendingStyle?: SpendingStyle): 
   // We ignore the intent/spendingStyle params to enforce a consistent UI
   
   return {
-    // Clean, modern background
-    wrapper: 'min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300',
-    pageBackground: 'bg-slate-50 dark:bg-slate-950',
+    // Clean, modern background - Deep Charcoal
+    wrapper: 'min-h-screen bg-[#0D0D0D] text-white transition-colors duration-300',
+    pageBackground: 'bg-[#0D0D0D]',
     
-    // Modern typography
+    // Modern typography - Anton & Inter
     fontFamily: 'font-sans',
-    headerFont: 'font-display',
-    headerStyle: 'font-bold tracking-tight text-slate-900 dark:text-white',
-    textColor: 'text-slate-600 dark:text-slate-300',
-    mutedText: 'text-slate-400 dark:text-slate-500',
+    headerFont: 'font-display uppercase tracking-wide',
+    headerStyle: 'font-display uppercase tracking-wide text-white',
+    textColor: 'text-white',
+    mutedText: 'text-gray-400',
     
-    // Clean cards with subtle borders
-    card: 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm',
-    cardHover: 'hover:shadow-md hover:border-indigo-200 dark:hover:border-indigo-800 transition-all duration-300',
-    surfacePrimary: 'bg-white dark:bg-slate-900',
-    surfaceSecondary: 'bg-slate-50 dark:bg-slate-800/50',
+    // Clean cards with subtle borders - Dark Olive Green
+    card: 'bg-[#2B2F23] border border-white/10 rounded-3xl shadow-lg',
+    cardHover: 'hover:border-[#D7FF00] transition-all duration-300',
+    surfacePrimary: 'bg-[#0D0D0D]',
+    surfaceSecondary: 'bg-[#2B2F23]',
     
-    // Primary Brand Color: Indigo/Violet
-    buttonPrimary: 'bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2 rounded-xl transition-colors shadow-sm hover:shadow-indigo-500/20',
-    buttonSecondary: 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 font-medium px-4 py-2 rounded-xl transition-colors',
-    buttonDanger: 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 px-4 py-2 rounded-xl transition-colors',
+    // Primary Brand Color: Fluorescent Yellow-Green
+    buttonPrimary: 'bg-[#D7FF00] hover:bg-[#C7FF3D] text-[#0D0D0D] font-bold uppercase tracking-wider px-6 py-3 rounded-full transition-all shadow-[0_0_15px_rgba(215,255,0,0.3)] hover:shadow-[0_0_25px_rgba(215,255,0,0.5)]',
+    buttonSecondary: 'bg-transparent text-white border border-white/20 hover:bg-white/10 font-bold uppercase tracking-wider px-6 py-3 rounded-full transition-colors',
+    buttonDanger: 'bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20 px-6 py-3 rounded-full transition-colors',
     
     // Inputs
-    input: 'w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none transition-all',
-    inputFocus: 'focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500',
+    input: 'w-full px-5 py-4 rounded-2xl border border-white/10 bg-[#2B2F23] text-white placeholder-gray-500 focus:outline-none transition-all',
+    inputFocus: 'focus:border-[#D7FF00] focus:ring-1 focus:ring-[#D7FF00]',
     
     // Accents
-    accent: 'text-indigo-600 dark:text-indigo-400',
-    accentBg: 'bg-indigo-50 dark:bg-indigo-900/20',
-    accentBorder: 'border-indigo-200 dark:border-indigo-800',
-    highlight: 'bg-indigo-600',
+    accent: 'text-[#D7FF00]',
+    accentBg: 'bg-[#D7FF00]',
+    accentBorder: 'border-[#D7FF00]',
+    highlight: 'bg-[#C7FF3D]',
     
     // Navigation
-    navBg: 'bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800',
-    navItem: 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors',
-    navItemActive: 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20',
+    navBg: 'bg-[#0D0D0D]/90 backdrop-blur-xl border-b border-white/5',
+    navItem: 'text-gray-400 hover:text-[#D7FF00] transition-colors font-medium uppercase tracking-wide text-sm',
+    navItemActive: 'text-[#D7FF00]',
     
     // Layout
-    borderRadius: 'rounded-2xl',
-    spacing: 'normal',
-    shadow: 'shadow-lg shadow-slate-200/50 dark:shadow-none',
+    borderRadius: 'rounded-3xl',
+    spacing: 'relaxed',
+    shadow: 'shadow-2xl shadow-black/50',
     
-    // Subtle gradients only
-    gradient: 'bg-gradient-to-br from-indigo-500 to-violet-600',
+    // Special Effects
+    gradient: 'bg-gradient-to-br from-[#D7FF00] to-[#C7FF3D]',
     animation: 'animate-fade-in',
   };
 };

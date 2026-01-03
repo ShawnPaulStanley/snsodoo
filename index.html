@@ -6,7 +6,7 @@
     <title>trvl - Plan Your Journey</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script>
       // Check for dark mode preference
       if (localStorage.getItem('gt_darkMode') === 'true' || 
@@ -21,20 +21,24 @@
           extend: {
             fontFamily: {
               sans: ['Inter', 'system-ui', 'sans-serif'],
-              display: ['Manrope', 'system-ui', 'sans-serif'],
+              display: ['Anton', 'system-ui', 'sans-serif'],
             },
             colors: {
+              neon: '#D7FF00',
+              charcoal: '#0D0D0D',
+              olive: '#2B2F23',
+              lime: '#C7FF3D',
               brand: {
-                50: '#f0f9ff',
-                100: '#e0f2fe',
-                200: '#bae6fd',
-                300: '#7dd3fc',
-                400: '#38bdf8',
-                500: '#0ea5e9',
-                600: '#0284c7',
-                700: '#0369a1',
-                800: '#075985',
-                900: '#0c4a6e',
+                50: '#f7fee7',
+                100: '#ecfccb',
+                200: '#d9f99d',
+                300: '#bef264',
+                400: '#a3e635',
+                500: '#D7FF00',
+                600: '#C7FF3D',
+                700: '#4d7c0f',
+                800: '#3f6212',
+                900: '#0D0D0D',
               },
               surface: {
                 50: '#f8fafc',

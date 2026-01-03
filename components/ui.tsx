@@ -6,10 +6,10 @@ export const Button = React.forwardRef<HTMLButtonElement, React.ButtonHTMLAttrib
     
     // These are default (Neutral) styles. The adaptive UI often overrides these classes completely.
     const variants = {
-      primary: "bg-brand-600 text-white hover:bg-brand-700 focus:ring-brand-500",
-      secondary: "bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 focus:ring-brand-500",
-      danger: "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500",
-      ghost: "bg-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900",
+      primary: "bg-[#D7FF00] text-[#0D0D0D] hover:bg-[#C7FF3D] focus:ring-[#D7FF00] font-bold uppercase tracking-wider shadow-[0_0_15px_rgba(215,255,0,0.3)] hover:shadow-[0_0_25px_rgba(215,255,0,0.5)]",
+      secondary: "bg-transparent text-white border border-white/20 hover:bg-white/10 focus:ring-[#D7FF00] font-bold uppercase tracking-wider",
+      danger: "bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20 focus:ring-red-500",
+      ghost: "bg-transparent text-gray-400 hover:text-[#D7FF00] hover:bg-white/5",
     };
 
     const sizes = {
@@ -34,10 +34,10 @@ export const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttribute
   ({ className = '', label, ...props }, ref) => {
     return (
       <div className="w-full">
-        {label && <label className="block text-sm font-medium text-slate-700 mb-1">{label}</label>}
+        {label && <label className="block text-sm font-medium text-gray-300 mb-1 uppercase tracking-wide">{label}</label>}
         <input
           ref={ref}
-          className={`block w-full rounded-lg border-slate-300 border bg-white px-3 py-2 text-sm placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
+          className={`block w-full rounded-xl border-white/10 border bg-[#2B2F23] px-4 py-3 text-sm text-white placeholder:text-gray-500 focus:border-[#D7FF00] focus:outline-none focus:ring-1 focus:ring-[#D7FF00] disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
           {...props}
         />
       </div>
@@ -48,7 +48,7 @@ Input.displayName = "Input";
 
 export const Card = ({ children, className = '', noPadding = false }: { children?: React.ReactNode; className?: string; noPadding?: boolean }) => {
   return (
-    <div className={`bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden ${className}`}>
+    <div className={`bg-[#2B2F23] border border-white/10 rounded-3xl shadow-lg overflow-hidden ${className}`}>
       <div className={noPadding ? '' : 'p-6'}>
         {children}
       </div>
