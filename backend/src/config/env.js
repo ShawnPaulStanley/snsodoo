@@ -1,7 +1,13 @@
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-// Load environment variables early so other modules can rely on them
-dotenv.config();
+// Get the directory of this file
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load environment variables from backend/.env
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 const env = {
   port: process.env.PORT || 4000,
